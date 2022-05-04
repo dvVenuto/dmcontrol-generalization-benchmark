@@ -13,6 +13,8 @@ from video import VideoRecorder
 
 def evaluate(env, agent, video, num_episodes, L, step, test_env=False):
 	episode_rewards = []
+	states = []
+	next_states = []
 	for i in range(num_episodes):
 		obs = env.reset()
 		video.init(enabled=(i==0))
@@ -21,7 +23,11 @@ def evaluate(env, agent, video, num_episodes, L, step, test_env=False):
 		while not done:
 			with utils.eval_mode(agent):
 				action = agent.select_action(obs)
+			if args.save_trajs:
+				states.append(obs)
 			obs, reward, done, _ = env.step(action)
+			if args.save_trajs:
+				next_states.append(obs)
 			video.record(env)
 			episode_reward += reward
 
@@ -30,8 +36,10 @@ def evaluate(env, agent, video, num_episodes, L, step, test_env=False):
 			video.save(f'{step}{_test_env}.mp4')
 			L.log(f'eval/episode_reward{_test_env}', episode_reward, step)
 		episode_rewards.append(episode_reward)
-	
-	return np.mean(episode_rewards)
+	if args.save_trajs:
+		return np.mean(episode_rewards), states, next_states
+	else:
+		return np.mean(episode_rewards)
 
 
 def main(args):
@@ -87,6 +95,9 @@ def main(args):
 		args=args
 	)
 
+	static_states = []
+	static_n_nstates = []
+
 	start_step, episode, episode_reward, done = 0, 0, 0, True
 	L = Logger(work_dir)
 	start_time = time.time()
@@ -101,9 +112,24 @@ def main(args):
 			if step % args.eval_freq == 0:
 				print('Evaluating:', work_dir)
 				L.log('eval/episode', episode, step)
-				evaluate(env, agent, video, args.eval_episodes, L, step)
+				if args.save_trajs:
+					_, states, n_states =evaluate(env, agent, video, args.eval_episodes, L, step)
+					static_states.append(states)
+					static_n_nstates.append(n_states)
+
+					static_states =np.array(static_states)
+					static_n_nstates =np.array(static_n_nstates)
+
+					print(static_states.shape)
+					print(static_n_nstates.shape)
+					quit()
+				else:
+					evaluate(env, agent, video, args.eval_episodes, L, step)
 				if test_env is not None:
-					evaluate(test_env, agent, video, args.eval_episodes, L, step, test_env=True)
+					if args.save_trajs:
+						_, states, n_states = evaluate(test_env, agent, video, args.eval_episodes, L, step, test_env=True)
+					else:
+						evaluate(test_env, agent, video, args.eval_episodes, L, step, test_env=True)
 				L.dump(step)
 
 			# Save agent periodically
