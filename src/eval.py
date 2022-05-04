@@ -15,12 +15,15 @@ import augmentations
 
 def evaluate(env, agent, video, num_episodes, eval_mode, adapt=False):
 	episode_rewards = []
+	static_states = []
+	n_static_states = []
 	for i in tqdm(range(num_episodes)):
 		if adapt:
 			ep_agent = deepcopy(agent)
 			ep_agent.init_pad_optimizer()
 		else:
 			ep_agent = agent
+
 		obs = env.reset()
 		video.init(enabled=True)
 		done = False
@@ -33,12 +36,19 @@ def evaluate(env, agent, video, num_episodes, eval_mode, adapt=False):
 			episode_reward += reward
 			if adapt:
 				ep_agent.update_inverse_dynamics(*augmentations.prepare_pad_batch(obs, next_obs, action))
+
+			if args.save_trajs:
+				static_states.append(obs)
+				n_static_states.append(next_obs)
+
 			obs = next_obs
 
 		video.save(f'eval_{eval_mode}_{i}.mp4')
 		episode_rewards.append(episode_reward)
-
-	return np.mean(episode_rewards)
+	if args.save_trajs:
+		return np.mean(episode_rewards), static_states, n_static_states
+	else:
+		return np.mean(episode_rewards)
 
 
 def main(args):
@@ -69,8 +79,11 @@ def main(args):
 	# Check if evaluation has already been run
 	if args.eval_mode == 'distracting_cs':
 		results_fp = os.path.join(work_dir, args.eval_mode+'_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+		states_fp = os.path.join(work_dir, args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
 	else:
 		results_fp = os.path.join(work_dir, args.eval_mode+'.pt')
+		states_fp = os.path.join(work_dir, args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+
 	assert not os.path.exists(results_fp), f'{args.eval_mode} results already exist for {work_dir}'
 
 	# Prepare agent
@@ -87,7 +100,12 @@ def main(args):
 	agent.train(False)
 
 	print(f'\nEvaluating {work_dir} for {args.eval_episodes} episodes (mode: {args.eval_mode})')
-	reward = evaluate(env, agent, video, args.eval_episodes, args.eval_mode)
+	if args.save_trajs:
+		reward, static_states, n_static_states = evaluate(env, agent, video, args.eval_episodes, args.eval_mode)
+		static_states = np.array(static_states)
+		n_static_states = np.array(n_static_states)
+	else:
+		reward = evaluate(env, agent, video, args.eval_episodes, args.eval_mode)
 	print('Reward:', int(reward))
 
 	adapt_reward = None
@@ -109,6 +127,10 @@ def main(args):
 		'reward': reward,
 		'adapt_reward': adapt_reward
 	}, results_fp)
+	torch.save({
+		'states': static_states,
+		'n_states': n_static_states,
+	}, states_fp)
 	print('Saved results to', results_fp)
 
 
