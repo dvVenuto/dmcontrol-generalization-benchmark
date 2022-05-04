@@ -12,8 +12,9 @@ def parse_args():
 	parser.add_argument('--action_repeat', default=4, type=int)
 	parser.add_argument('--episode_length', default=1000, type=int)
 	parser.add_argument('--eval_mode', default='color_hard', type=str)
-	
-	# agent
+	parser.add_argument('--train_mode', default='train', type=str)
+
+# agent
 	parser.add_argument('--algorithm', default='sac', type=str)
 	parser.add_argument('--train_steps', default='50k', type=str)
 	parser.add_argument('--discount', default=0.99, type=float)
