@@ -9,6 +9,7 @@ from env.wrappers import make_env
 from algorithms.factory import make_agent
 from logger import Logger
 from video import VideoRecorder
+from random import sample
 
 
 def evaluate(env, agent, video, num_episodes, L, step, test_env=False):
