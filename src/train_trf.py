@@ -101,6 +101,8 @@ def main(args):
     sample_static_states = sample(static_states,int(args.batch_size))
     print(sample_static_states)
 
+    quit()
+
     start_step, episode, episode_reward, done = 0, 0, 0, True
     L = Logger(work_dir)
     start_time = time.time()
