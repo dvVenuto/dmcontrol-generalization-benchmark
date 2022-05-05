@@ -73,7 +73,7 @@ def main(args):
 
     # Set working directory
     work_dir = os.path.join(args.log_dir, args.domain_name+'_'+args.task_name, args.algorithm, str(args.seed))
-    work_dir = "./"
+    work_dir = "./eval_dir"
     print('Working directory:', work_dir)
     assert os.path.exists(work_dir), 'specified working directory does not exist'
     #model_dir = utils.make_dir(os.path.join(work_dir, 'model'))
