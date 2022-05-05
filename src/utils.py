@@ -244,7 +244,6 @@ class ReplayBufferMixup(object):
 			self._obses = prefill_memory(self._obses, capacity, obs_shape)
 
 		self._statics = []
-		print(obs.shape)
 		if prefill:
 			self._statics = prefill_memory(self._statics, capacity, (9,84,84))
 
@@ -294,6 +293,8 @@ class ReplayBufferMixup(object):
 		obses, next_obses = [], []
 		for i in idxs:
 			obs, next_obs = self._statics[i]
+			print(obs.shape)
+			print(next_obs.shape)
 			obses.append(np.array(obs, copy=False))
 			next_obses.append(np.array(next_obs, copy=False))
 		return np.array(obses), np.array(next_obses)
