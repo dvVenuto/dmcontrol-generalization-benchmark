@@ -160,10 +160,6 @@ def main(args):
         sample_static_states = random.choice(static_states)
         sample_static_n_states = random.choice(n_static_states)
 
-        print(sample_static_states)
-        print(obs)
-        print("REPLAY")
-
         replay_buffer.add(obs, action, reward, next_obs, done_bool, sample_static_states, sample_static_n_states)
         episode_reward += reward
         obs = next_obs

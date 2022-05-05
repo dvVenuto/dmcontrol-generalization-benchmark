@@ -341,15 +341,10 @@ class ReplayBufferMixup(object):
 		static_obs = augmentations.random_shift(static_obs, pad)
 		next_static_obs = augmentations.random_shift(next_static_obs, pad)
 
-		print(obs)
-		print(static_obs)
-
 		alpha = 0.5
 
 		obs = ((1-alpha)*(obs/255.) + (alpha)*static_obs)*255.
 		next_obs = ((1-alpha)*(next_obs/255.) + (alpha)*next_static_obs)*255.
-		quit()
-
 
 		return obs, actions, rewards, next_obs, not_dones
 
