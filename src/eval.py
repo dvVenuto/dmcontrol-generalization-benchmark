@@ -105,8 +105,6 @@ def main(args):
 	print(f'\nEvaluating {work_dir} for {args.eval_episodes} episodes (mode: {args.eval_mode})')
 	if args.save_trajs:
 		reward, static_states, n_static_states = evaluate(env, agent, video, args.eval_episodes, args.eval_mode)
-		static_states = np.array(static_states)
-		n_static_states = np.array(n_static_states)
 	else:
 		reward = evaluate(env, agent, video, args.eval_episodes, args.eval_mode)
 	print('Reward:', int(reward))
