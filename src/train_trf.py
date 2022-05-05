@@ -158,8 +158,8 @@ def main(args):
         next_obs, reward, done, _ = env.step(action)
         done_bool = 0 if episode_step + 1 == env._max_episode_steps else float(done)
 
-        sample_static_states = sample(static_states,int(args.batch_size))
-        sample_static_n_states = sample(n_static_states,int(args.batch_size))
+        sample_static_states = sample(static_states,int(1))
+        sample_static_n_states = sample(n_static_states,int(1))
 
         replay_buffer.add(obs, action, reward, next_obs, done_bool, sample_static_states, sample_static_n_states)
         episode_reward += reward
