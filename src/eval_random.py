@@ -85,8 +85,8 @@ def main(args):
         results_fp = os.path.join(work_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
         states_fp = os.path.join(work_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
     else:
-        results_fp = os.path.join(work_dir, args.eval_mode+'.pt')
-        states_fp = os.path.join(work_dir, args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+        results_fp = os.path.join(work_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'.pt')
+        states_fp = os.path.join(work_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
 
     assert not os.path.exists(results_fp), f'{args.eval_mode} results already exist for {work_dir}'
 
