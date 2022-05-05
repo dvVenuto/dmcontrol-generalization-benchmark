@@ -68,6 +68,9 @@ def main(args):
 		intensity=args.distracting_cs_intensity
 	)
 
+	static_states=[]
+	n_static_states=[]
+
 	# Set working directory
 	work_dir = os.path.join(args.log_dir, args.domain_name+'_'+args.task_name, args.algorithm, str(args.seed))
 	print('Working directory:', work_dir)
