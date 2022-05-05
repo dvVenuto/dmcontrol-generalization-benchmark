@@ -158,7 +158,7 @@ def main(args):
         done_bool = 0 if episode_step + 1 == env._max_episode_steps else float(done)
 
         sample_static_states = random.choice(static_states)
-        sample_static_n_states = random.choice(sample_static_n_states)
+        sample_static_n_states = random.choice(n_static_states)
 
         print(sample_static_states)
         print(obs)
