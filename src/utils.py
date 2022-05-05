@@ -293,8 +293,6 @@ class ReplayBufferMixup(object):
 		obses, next_obses = [], []
 		for i in idxs:
 			obs, next_obs = self._statics[i]
-			print(obs.shape)
-			print(next_obs.shape)
 			obses.append(np.array(obs, copy=False))
 			next_obses.append(np.array(next_obs, copy=False))
 		return np.array(obses), np.array(next_obses)

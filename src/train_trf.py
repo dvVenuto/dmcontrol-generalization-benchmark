@@ -9,8 +9,7 @@ from env.wrappers import make_env
 from algorithms.factory import make_agent
 from logger import Logger
 from video import VideoRecorder
-from random import sample
-
+import random
 
 def evaluate(env, agent, video, num_episodes, L, step, test_env=False):
     episode_rewards = []
@@ -158,8 +157,8 @@ def main(args):
         next_obs, reward, done, _ = env.step(action)
         done_bool = 0 if episode_step + 1 == env._max_episode_steps else float(done)
 
-        sample_static_states = sample(static_states,int(1))
-        sample_static_n_states = sample(n_static_states,int(1))
+        sample_static_states = random.choice(static_states)
+        sample_static_n_states = random.choice(sample_static_n_states)
 
         print(sample_static_states)
         print(obs)
