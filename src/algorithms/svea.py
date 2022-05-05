@@ -65,15 +65,6 @@ class SVEA(SAC):
 	def update_mixer(self, replay_buffer, L, step, static_states, static_n_states):
 		obs, action, reward, next_obs, not_done = replay_buffer.sample_drq()
 
-		alpha = 0.5
-		pad=4
-
-		print(obs)
-		print(static_states)
-		obs = ((1-alpha)*(obs/255.) + (alpha)*static_states)*255.
-		print(obs)
-
-		quit()
 
 		next_obs = ((1-alpha)*(next_obs/255.) + (alpha)*static_n_states)*255.
 
@@ -84,3 +75,11 @@ class SVEA(SAC):
 
 		if step % self.critic_target_update_freq == 0:
 			self.soft_update_critic_target()
+
+	def _encode_obses(self, idxs):
+		obses, next_obses = [], []
+		for i in idxs:
+			obs, next_obs = self._obses[i]
+			obses.append(np.array(obs, copy=False))
+			next_obses.append(np.array(next_obs, copy=False))
+		return np.array(obses), np.array(next_obses)

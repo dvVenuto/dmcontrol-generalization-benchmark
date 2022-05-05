@@ -232,3 +232,132 @@ def count_parameters(net, as_int=False):
 	if as_int:
 		return count
 	return f'{count:,}'
+
+class ReplayBufferMixup(object):
+	"""Buffer to store environment transitions"""
+	def __init__(self, obs_shape, action_shape, capacity, batch_size, prefill=True):
+		self.capacity = capacity
+		self.batch_size = batch_size
+
+		self._obses = []
+		if prefill:
+			self._obses = prefill_memory(self._obses, capacity, obs_shape)
+
+		self._statics = []
+		if prefill:
+			self._statics = prefill_memory(self._statics, capacity, obs_shape)
+
+		self.actions = np.empty((capacity, *action_shape), dtype=np.float32)
+		self.rewards = np.empty((capacity, 1), dtype=np.float32)
+		self.not_dones = np.empty((capacity, 1), dtype=np.float32)
+
+		self.idx = 0
+		self.full = False
+
+	def add(self, obs, action, reward, next_obs, done, static_states, n_static_states):
+		obses = (obs, next_obs)
+		if self.idx >= len(self._obses):
+			self._obses.append(obses)
+		else:
+			self._obses[self.idx] = (obses)
+
+		statics = (static_states, n_static_states)
+		if self.idx >= len(self._statics):
+			self._statics.append(statics)
+		else:
+			self._statics[self.idx] = (statics)
+
+		np.copyto(self.actions[self.idx], action)
+		np.copyto(self.rewards[self.idx], reward)
+		np.copyto(self.not_dones[self.idx], not done)
+
+		self.idx = (self.idx + 1) % self.capacity
+		self.full = self.full or self.idx == 0
+
+	def _get_idxs(self, n=None):
+		if n is None:
+			n = self.batch_size
+		return np.random.randint(
+			0, self.capacity if self.full else self.idx, size=n
+		)
+
+	def _encode_obses(self, idxs):
+		obses, next_obses = [], []
+		for i in idxs:
+			obs, next_obs = self._obses[i]
+			obses.append(np.array(obs, copy=False))
+			next_obses.append(np.array(next_obs, copy=False))
+		return np.array(obses), np.array(next_obses)
+
+	def _encode_statics(self, idxs):
+		obses, next_obses = [], []
+		for i in idxs:
+			obs, next_obs = self._statics[i]
+			obses.append(np.array(obs, copy=False))
+			next_obses.append(np.array(next_obs, copy=False))
+		return np.array(obses), np.array(next_obses)
+
+	def sample_soda(self, n=None):
+		idxs = self._get_idxs(n)
+		obs, _ = self._encode_obses(idxs)
+		return torch.as_tensor(obs).cuda().float()
+
+	def sample_curl(self, n=None):
+		idxs = self._get_idxs(n)
+
+		obs, next_obs = self._encode_obses(idxs)
+		obs = torch.as_tensor(obs).cuda().float()
+		next_obs = torch.as_tensor(next_obs).cuda().float()
+		actions = torch.as_tensor(self.actions[idxs]).cuda()
+		rewards = torch.as_tensor(self.rewards[idxs]).cuda()
+		not_dones = torch.as_tensor(self.not_dones[idxs]).cuda()
+
+		pos = augmentations.random_crop(obs.clone())
+		obs = augmentations.random_crop(obs)
+		next_obs = augmentations.random_crop(next_obs)
+
+		return obs, actions, rewards, next_obs, not_dones, pos
+
+	def sample_drq(self, n=None, pad=4):
+		idxs = self._get_idxs(n)
+
+		obs, next_obs = self._encode_obses(idxs)
+		static_obs, next_static_obs = self._encode_statics(idxs)
+
+		obs = torch.as_tensor(obs).cuda().float()
+		next_obs = torch.as_tensor(next_obs).cuda().float()
+
+		static_obs = torch.as_tensor(static_obs).cuda().float()
+		next_static_obs = torch.as_tensor(next_static_obs).cuda().float()
+
+		actions = torch.as_tensor(self.actions[idxs]).cuda()
+		rewards = torch.as_tensor(self.rewards[idxs]).cuda()
+		not_dones = torch.as_tensor(self.not_dones[idxs]).cuda()
+
+		obs = augmentations.random_shift(obs, pad)
+		next_obs = augmentations.random_shift(next_obs, pad)
+
+		print(obs)
+		print(static_obs)
+
+		alpha = 0.5
+
+		quit()
+
+		return obs, actions, rewards, next_obs, not_dones
+
+	def sample(self, n=None):
+		idxs = self._get_idxs(n)
+
+		obs, next_obs = self._encode_obses(idxs)
+		obs = torch.as_tensor(obs).cuda().float()
+		next_obs = torch.as_tensor(next_obs).cuda().float()
+		actions = torch.as_tensor(self.actions[idxs]).cuda()
+		rewards = torch.as_tensor(self.rewards[idxs]).cuda()
+		not_dones = torch.as_tensor(self.not_dones[idxs]).cuda()
+
+		obs = augmentations.random_crop(obs)
+		next_obs = augmentations.random_crop(next_obs)
+
+		return obs, actions, rewards, next_obs, not_dones
+

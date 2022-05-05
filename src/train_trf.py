@@ -92,7 +92,7 @@ def main(args):
 
     # Prepare agent
     assert torch.cuda.is_available(), 'must have cuda enabled'
-    replay_buffer = utils.ReplayBuffer(
+    replay_buffer = utils.ReplayBufferMixup(
         obs_shape=env.observation_space.shape,
         action_shape=env.action_space.shape,
         capacity=args.train_steps,
@@ -152,14 +152,16 @@ def main(args):
         if step >= args.init_steps:
             num_updates = args.init_steps if step == args.init_steps else 1
             for _ in range(num_updates):
-                sample_static_states = sample(static_states,int(args.batch_size))
-                sample_static_n_states = sample(n_static_states,int(args.batch_size))
-                agent.update_mixer(replay_buffer, L, step, sample_static_states, sample_static_n_states)
+                agent.update(replay_buffer, L, step)
 
         # Take step
         next_obs, reward, done, _ = env.step(action)
         done_bool = 0 if episode_step + 1 == env._max_episode_steps else float(done)
-        replay_buffer.add(obs, action, reward, next_obs, done_bool)
+
+        sample_static_states = sample(static_states,int(args.batch_size))
+        sample_static_n_states = sample(n_static_states,int(args.batch_size))
+
+        replay_buffer.add(obs, action, reward, next_obs, done_bool, sample_static_states, sample_static_n_states)
         episode_reward += reward
         obs = next_obs
 
