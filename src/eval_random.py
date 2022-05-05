@@ -82,8 +82,8 @@ def main(args):
 
     # Check if evaluation has already been run
     if args.eval_mode == 'distracting_cs':
-        results_fp = os.path.join(work_dir, args.eval_mode+'_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
-        states_fp = os.path.join(work_dir, args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+        results_fp = os.path.join(work_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+        states_fp = os.path.join(work_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
     else:
         results_fp = os.path.join(work_dir, args.eval_mode+'.pt')
         states_fp = os.path.join(work_dir, args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
@@ -106,8 +106,6 @@ def main(args):
     print(f'\nEvaluating {work_dir} for {args.eval_episodes} episodes (mode: {args.eval_mode})')
     if args.save_trajs:
         reward, static_states, n_static_states = evaluate(env, agent, video, args.eval_episodes, args.eval_mode)
-        static_states = np.array(static_states)
-        n_static_states = np.array(n_static_states)
     else:
         reward = evaluate(env, agent, video, args.eval_episodes, args.eval_mode)
     print('Reward:', int(reward))
