@@ -15,6 +15,9 @@ class SVEA(SAC):
 		self.svea_alpha = args.svea_alpha
 		self.svea_beta = args.svea_beta
 
+		#pad = 4
+		#self.random_shift = augmentations.random_shift(obs, pad=pad)
+
 	def update_critic(self, obs, action, reward, next_obs, not_done, L=None, step=None):
 		with torch.no_grad():
 			_, policy_action, log_pi, _ = self.actor(next_obs)
@@ -50,6 +53,29 @@ class SVEA(SAC):
 
 	def update(self, replay_buffer, L, step):
 		obs, action, reward, next_obs, not_done = replay_buffer.sample_drq()
+
+		self.update_critic(obs, action, reward, next_obs, not_done, L, step)
+
+		if step % self.actor_update_freq == 0:
+			self.update_actor_and_alpha(obs, L, step)
+
+		if step % self.critic_target_update_freq == 0:
+			self.soft_update_critic_target()
+
+	def update_mixer(self, replay_buffer, L, step, static_states, static_n_states):
+		obs, action, reward, next_obs, not_done = replay_buffer.sample_drq()
+
+		alpha = 0.5
+		pad=4
+
+		print(obs)
+		print(static_states)
+		obs = ((1-alpha)*(obs/255.) + (alpha)*static_states)*255.
+		print(obs)
+
+		quit()
+
+		next_obs = ((1-alpha)*(next_obs/255.) + (alpha)*static_n_states)*255.
 
 		self.update_critic(obs, action, reward, next_obs, not_done, L, step)
 

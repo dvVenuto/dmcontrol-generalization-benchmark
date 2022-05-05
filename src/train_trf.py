@@ -63,9 +63,16 @@ def main(args):
     eval_dir = "./eval_dir"
 
     if args.eval_mode == 'distracting_cs':
-        states_fp = os.path.join(eval_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+        if args.use_random ==True:
+            states_fp = os.path.join(eval_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+        else:
+            states_fp = os.path.join(eval_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_EXPERT_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
     else:
-        states_fp = os.path.join(eval_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+        if args.use_random ==True:
+            states_fp = os.path.join(eval_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+        else:
+            states_fp = os.path.join(eval_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_EXPERT_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+
 
     states_fp = torch.load(states_fp)
     static_states = states_fp["states"]
@@ -99,10 +106,7 @@ def main(args):
         action_shape=env.action_space.shape,
         args=args
     )
-    sample_static_states = sample(static_states,int(args.batch_size))
-    print(sample_static_states)
 
-    quit()
 
     start_step, episode, episode_reward, done = 0, 0, 0, True
     L = Logger(work_dir)
@@ -148,7 +152,9 @@ def main(args):
         if step >= args.init_steps:
             num_updates = args.init_steps if step == args.init_steps else 1
             for _ in range(num_updates):
-                agent.update(replay_buffer, L, step)
+                sample_static_states = sample(static_states,int(args.batch_size))
+                sample_static_n_states = sample(n_static_states,int(args.batch_size))
+                agent.update_mixer(replay_buffer, L, step, sample_static_states, sample_static_n_states)
 
         # Take step
         next_obs, reward, done, _ = env.step(action)

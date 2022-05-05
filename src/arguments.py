@@ -65,6 +65,7 @@ def parse_args():
 	parser.add_argument('--eval_freq', default='10k', type=str)
 	parser.add_argument('--eval_episodes', default=30, type=int)
 	parser.add_argument('--distracting_cs_intensity', default=0., type=float)
+	parser.add_argument('--use_random',default=False, action='store_true')
 
 	# misc
 	parser.add_argument('--seed', default=None, type=int)
