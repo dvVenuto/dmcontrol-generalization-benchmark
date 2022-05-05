@@ -65,9 +65,6 @@ class SVEA(SAC):
 	def update_mixer(self, replay_buffer, L, step, static_states, static_n_states):
 		obs, action, reward, next_obs, not_done = replay_buffer.sample_drq()
 
-
-		next_obs = ((1-alpha)*(next_obs/255.) + (alpha)*static_n_states)*255.
-
 		self.update_critic(obs, action, reward, next_obs, not_done, L, step)
 
 		if step % self.actor_update_freq == 0:

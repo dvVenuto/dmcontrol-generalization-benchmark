@@ -320,9 +320,10 @@ class ReplayBufferMixup(object):
 
 	def sample_drq(self, n=None, pad=4):
 		idxs = self._get_idxs(n)
+		idxs_aug = self._get_idxs(n)
 
 		obs, next_obs = self._encode_obses(idxs)
-		static_obs, next_static_obs = self._encode_statics(idxs)
+		static_obs, next_static_obs = self._encode_statics(idxs_aug)
 
 		obs = torch.as_tensor(obs).cuda().float()
 		next_obs = torch.as_tensor(next_obs).cuda().float()
@@ -337,12 +338,18 @@ class ReplayBufferMixup(object):
 		obs = augmentations.random_shift(obs, pad)
 		next_obs = augmentations.random_shift(next_obs, pad)
 
+		static_obs = augmentations.random_shift(static_obs, pad)
+		next_static_obs = augmentations.random_shift(next_static_obs, pad)
+
 		print(obs)
 		print(static_obs)
 
 		alpha = 0.5
 
+		obs = ((1-alpha)*(obs/255.) + (alpha)*static_obs)*255.
+		next_obs = ((1-alpha)*(next_obs/255.) + (alpha)*next_static_obs)*255.
 		quit()
+
 
 		return obs, actions, rewards, next_obs, not_dones
 
