@@ -49,7 +49,6 @@ def main(args):
 		image_size=args.image_size,
 		mode=args.train_mode,
 		intensity=args.distracting_cs_intensity,
-		img_source=args.img_source
 	)
 	test_env = make_env(
 		domain_name=args.domain_name,
