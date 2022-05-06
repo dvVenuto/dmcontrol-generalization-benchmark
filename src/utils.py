@@ -7,7 +7,7 @@ import random
 import augmentations
 import subprocess
 from datetime import datetime
-
+import torch.nn as nn
 
 class eval_mode(object):
 	def __init__(self, *models):
@@ -254,6 +254,20 @@ class ReplayBufferMixup(object):
 		self.idx = 0
 		self.full = False
 
+		self.filter = nn.Conv2d(obs_shape[0], 9, 1)
+		self.filter = nn.Conv2d(in_channels = 9, out_channels = 9, kernel_size=84, bias=False)
+
+		filtered = np.random.rand(9*84*84).reshape([9,84,84])
+		anti_filter = np.ones(9*84*84).reshape([9,84,84])
+		anti_filter = anti_filter - filtered
+		self.rand_filter = torch.from_numpy(filtered)
+		self.rand_filter = self.rand_filter.float()
+		self.rand_filter = self.rand_filter
+
+		self.anti_filter = torch.from_numpy(anti_filter)
+		self.anti_filter = self.anti_filter.float()
+		self.anti_filter = self.anti_filter
+
 	def add(self, obs, action, reward, next_obs, done, static_states, n_static_states):
 		obses = (obs, next_obs)
 		if self.idx >= len(self._obses):
@@ -343,8 +357,21 @@ class ReplayBufferMixup(object):
 
 		alpha = 0.5
 
-		obs = ((1-alpha)*(obs/255.) + (alpha)*static_obs)*255.
-		next_obs = ((1-alpha)*(next_obs/255.) + (alpha)*next_static_obs)*255.
+		#Overlay
+		#obs = ((1-alpha)*(obs/255.) + (alpha)*static_obs)*255.
+		#next_obs = ((1-alpha)*(next_obs/255.) + (alpha)*next_static_obs)*255.
+
+		#Filter
+		with torch.no_grad():
+			#static_obs = self.filter(static_obs)
+			#next_static_obs = self.filter(next_static_obs)
+			static_obs = static_obs*self.rand_filter
+			next_static_obs=next_static_obs*self.rand_filter
+			obs = obs * self.anti_filter
+			next_obs = next_obs * self.anti_filter
+
+		obs = static_obs + obs
+		next_obs = next_static_obs  + next_obs
 
 		return obs, actions, rewards, next_obs, not_dones
 
