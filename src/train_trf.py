@@ -73,7 +73,7 @@ def main(args):
         else:
             states_fp = os.path.join(eval_dir, args.domain_name+'_'+args.task_name+'_'+args.eval_mode+'_EXPERT_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
     if args.img_source is not None:
-        states_fp = os.path.join(work_dir, args.domain_name+'_'+args.task_name+'_'+args.img_source+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+        states_fp = os.path.join(eval_dir, args.domain_name+'_'+args.task_name+'_'+args.img_source+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
 
     states_fp = torch.load(states_fp)
     static_states = states_fp["states"]
