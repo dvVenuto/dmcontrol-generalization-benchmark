@@ -65,7 +65,8 @@ def main(args):
 		action_repeat=args.action_repeat,
 		image_size=args.image_size,
 		mode=args.eval_mode,
-		intensity=args.distracting_cs_intensity
+		intensity=args.distracting_cs_intensity,
+		img_source=args.img_source
 	)
 
 	static_states=[]

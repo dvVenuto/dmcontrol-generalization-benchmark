@@ -2,6 +2,7 @@ from gym import core, spaces
 from dm_control import suite
 from dm_env import specs
 import numpy as np
+from dmc2gym import natural_imgsource
 
 
 def _spec_to_box(spec):
@@ -51,7 +52,8 @@ class DMCWrapper(core.Env):
         background_dataset_paths=None,
         environment_kwargs=None,
         setting_kwargs=None,
-        channels_first=True
+        channels_first=True,
+        img_source=None
     ):
         assert 'random' in task_kwargs, 'please specify a seed, for deterministic behaviour'
         self._domain_name = domain_name
@@ -109,8 +111,31 @@ class DMCWrapper(core.Env):
             self._observation_space = _spec_to_box(
                 self._env.observation_spec().values()
             )
+
+        self._img_source = img_source
+        height = 84
+        width = 84
         
         self.current_state = None
+        # background
+        if img_source is not None:
+            shape2d = (height, width)
+            if img_source == "color":
+                self._bg_source = natural_imgsource.RandomColorSource(shape2d)
+            elif img_source == "noise":
+                self._bg_source = natural_imgsource.NoiseSource(shape2d)
+            else:
+                files = glob.glob(os.path.expanduser(self.resource_files))
+                assert len(files), "Pattern {} does not match any files".format(
+                    self.resource_files
+                )
+                if img_source == "images":
+                    self._bg_source = natural_imgsource.RandomImageSource(shape2d, files, grayscale=True, total_frames=self.total_frames)
+                elif img_source == "video":
+                    self._bg_source = natural_imgsource.RandomVideoSource(shape2d, files, grayscale=True, total_frames=self.total_frames)
+                else:
+                    raise Exception("img_source %s not defined." % img_source)
+            print(self._bg_source)
 
         # set seed
         self.seed(seed=task_kwargs.get('random', 1))
@@ -125,6 +150,14 @@ class DMCWrapper(core.Env):
                 width=self._width,
                 camera_id=self._camera_id
             )
+            if self._img_source is not None:
+                if self._img_source == "color":
+                    self._bg_source.reset()
+
+                mask = np.logical_and((obs[:, :, 2] > obs[:, :, 1]), (obs[:, :, 2] > obs[:, :, 0]))  # hardcoded for dmc
+                bg = self._bg_source.get_image()
+                obs[mask] = bg[mask]
+
             if self._channels_first:
                 obs = obs.transpose(2, 0, 1).copy()
         else:

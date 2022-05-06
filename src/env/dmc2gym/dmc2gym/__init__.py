@@ -19,7 +19,8 @@ def make(
         environment_kwargs=None,
         setting_kwargs=None,
         time_limit=None,
-        channels_first=True
+        channels_first=True,
+        img_source = None
 ):
     if is_distracting_cs:
         env_id = 'dmc_%s_%s-%s-v1' % (domain_name, task_name, 'dcs')
@@ -58,6 +59,7 @@ def make(
                 distracting_cs_intensity=distracting_cs_intensity,
                 background_dataset_paths=background_dataset_paths,
                 channels_first=channels_first,
+                img_source = img_source
             ),
             max_episode_steps=max_episode_steps,
         )

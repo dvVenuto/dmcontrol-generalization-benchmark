@@ -19,7 +19,8 @@ def make_env(
 		action_repeat=4,
 		image_size=100,
 		mode='train',
-		intensity=0.
+		intensity=0.,
+		img_source=None
 	):
 	"""Make environment for experiments"""
 	assert mode in {'train', 'color_easy', 'color_hard', 'video_easy', 'video_hard', 'distracting_cs'}, \
@@ -45,7 +46,8 @@ def make_env(
 		frame_skip=action_repeat,
 		is_distracting_cs=is_distracting_cs,
 		distracting_cs_intensity=intensity,
-		background_dataset_paths=paths
+		background_dataset_paths=paths,
+		img_source=img_source
 	)
 	if not is_distracting_cs:
 		env = VideoWrapper(env, mode, seed)

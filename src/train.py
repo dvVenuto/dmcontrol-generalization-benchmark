@@ -48,7 +48,8 @@ def main(args):
 		action_repeat=args.action_repeat,
 		image_size=args.image_size,
 		mode=args.train_mode,
-		intensity=args.distracting_cs_intensity
+		intensity=args.distracting_cs_intensity,
+		img_source=args.img_source
 	)
 	test_env = make_env(
 		domain_name=args.domain_name,
@@ -58,7 +59,8 @@ def main(args):
 		action_repeat=args.action_repeat,
 		image_size=args.image_size,
 		mode=args.eval_mode,
-		intensity=args.distracting_cs_intensity
+		intensity=args.distracting_cs_intensity,
+		img_source=args.img_source
 	) if args.eval_mode is not None else None
 
 	# Create working directory
