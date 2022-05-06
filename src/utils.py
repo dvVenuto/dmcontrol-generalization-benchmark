@@ -8,6 +8,7 @@ import augmentations
 import subprocess
 from datetime import datetime
 import torch.nn as nn
+import torchvision
 
 class eval_mode(object):
 	def __init__(self, *models):
@@ -261,12 +262,12 @@ class ReplayBufferMixup(object):
 		anti_filter = np.ones(9*84*84).reshape([9,84,84])
 		anti_filter = anti_filter - filtered
 		self.rand_filter = torch.from_numpy(filtered)
+		self.rand_filter = self.rand_filter.cuda()
 		self.rand_filter = self.rand_filter.float()
-		self.rand_filter = self.rand_filter
 
 		self.anti_filter = torch.from_numpy(anti_filter)
+		self.anti_filter = self.anti_filter.cuda()
 		self.anti_filter = self.anti_filter.float()
-		self.anti_filter = self.anti_filter
 
 	def add(self, obs, action, reward, next_obs, done, static_states, n_static_states):
 		obses = (obs, next_obs)
@@ -355,6 +356,18 @@ class ReplayBufferMixup(object):
 		static_obs = augmentations.random_shift(static_obs, pad)
 		next_static_obs = augmentations.random_shift(next_static_obs, pad)
 
+		piller =torchvision.transforms.ToPILImage()
+
+		save = obs[5,0:3,:,:]
+		print(save.shape)
+		save = piller(save)
+		save.save("obs_std.png")
+
+		save = static_obs[5,0:3,:,:]
+		print(save.shape)
+		save = piller(save)
+		save.save("obs_static.png")
+
 		alpha = 0.5
 
 		#Overlay
@@ -372,6 +385,13 @@ class ReplayBufferMixup(object):
 
 		obs = static_obs + obs
 		next_obs = next_static_obs  + next_obs
+
+		save = obs[5,0:3,:,:]
+		print(save.shape)
+		save = piller(save)
+		save.save("obs_mix.png")
+
+		quit()
 
 		return obs, actions, rewards, next_obs, not_dones
 
