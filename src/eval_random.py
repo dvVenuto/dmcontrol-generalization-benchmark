@@ -91,6 +91,11 @@ def main(args):
 
     assert not os.path.exists(results_fp), f'{args.eval_mode} results already exist for {work_dir}'
 
+    if args.img_source is not None:
+        states_fp = os.path.join(work_dir, args.domain_name+'_'+args.task_name+'_'+args.img_source+'_STATES_'+str(args.distracting_cs_intensity).replace('.', '_')+'.pt')
+        results_fp = os.path.join(work_dir, args.domain_name+'_'+args.task_name+'_'+args.img_source+'.pt')
+
+
     # Prepare agent
     assert torch.cuda.is_available(), 'must have cuda enabled'
     cropped_obs_shape = (3*args.frame_stack, args.image_crop_size, args.image_crop_size)
