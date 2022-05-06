@@ -356,17 +356,17 @@ class ReplayBufferMixup(object):
 		static_obs = augmentations.random_shift(static_obs, pad)
 		next_static_obs = augmentations.random_shift(next_static_obs, pad)
 
-		piller =torchvision.transforms.ToPILImage()
+		#piller =torchvision.transforms.ToPILImage()
 
-		save = obs[5,0:3,:,:]
-		print(save.shape)
-		save = piller(save)
-		save.save("obs_std.png")
+		#save = obs[5,0:3,:,:]
+		#print(save.shape)
+		#save = piller(save)
+		#save.save("obs_std.png")
 
-		save = static_obs[5,0:3,:,:]
-		print(save.shape)
-		save = piller(save)
-		save.save("obs_static.png")
+		#save = static_obs[5,0:3,:,:]
+		#print(save.shape)
+		#save = piller(save)
+		#save.save("obs_static.png")
 
 		alpha = 0.5
 
@@ -386,12 +386,10 @@ class ReplayBufferMixup(object):
 		obs = static_obs + obs
 		next_obs = next_static_obs  + next_obs
 
-		save = obs[5,0:3,:,:]
-		print(save.shape)
-		save = piller(save)
-		save.save("obs_mix.png")
-
-		quit()
+		#save = obs[5,0:3,:,:]
+		#print(save.shape)
+		#save = piller(save)
+		#save.save("obs_mix.png")
 
 		return obs, actions, rewards, next_obs, not_dones
 
